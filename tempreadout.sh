@@ -1,7 +1,39 @@
 #!/bin/bash 
-hostip="192.168.1.9"
+hostip="192.168.97.239"
 sleeptime=15
 
+get_info () {
+	DATA="$(sensors)"
+	temp=`echo $DATA | awk -F 'temp1: ' '{print $2}' | awk -F 'crit' '{print $1}' | egrep  -o '[0-9]{1,2}.[0-9]{1,2}'`
+} 
+
+print_data () {
+    echo "hum: $temp"
+}
+
+write_data () {
+    #Write the data to the database
+    curl -i -XPOST 'http://192.168.100.9:8086/write?db=water' --data-binary "shelly,host=192.168.97.240,sensor=temp value=$temp"
+}
+
+while :
+do
+    #Sleep between readings
+    sleep "$sleeptime"
+
+    get_info
+
+    if [ -z "$hum"  ];
+        then
+            sleep "$sleeptime"
+            echo "Skip this datapoint - something went wrong with the read"
+
+        else
+            #Output console data for future reference
+            #print_data
+            write_data
+    fi
+done
 
 get_sysctl_temp () {
     COUNTER=0
@@ -48,23 +80,23 @@ get_sysctl_temp () {
 write_data () {
      #Write the data to the database
      #curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=chelsiotemp value=$chelsiotemp"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=cpu0temp value=$cpu0temp"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=cpu1temp value=$cpu1temp"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=cpu2temp value=$cpu2temp"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=cpu3temp value=$cpu3temp"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=SFC0 value=$SFC0"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=SFC1 value=$SFC1"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=SYSTIN value=$SYSTIN"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=CPUTIN value=$CPUTIN"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=AUXTIN0 value=$AUXTIN0"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=AUXTIN2 value=$AUXTIN2"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=AUXTIN3 value=$AUXTIN3"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=PECI value=$PECI"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,fan=fan,sensor=FANSPEED1 value=$fan1"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,fan=fan,sensor=FANSPEED2 value=$fan2"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,fan=fan,sensor=FANSPEED3 value=$fan3"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,fan=fan,sensor=FANSPEED4 value=$fan4"
-     curl -i -XPOST 'http://192.168.1.10:8086/write?db=temp' --data-binary "health_data,host=$hostip,fan=fan,sensor=FANSPEED5 value=$fan5"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=cpu0temp value=$cpu0temp"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=cpu1temp value=$cpu1temp"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=cpu2temp value=$cpu2temp"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=cpu3temp value=$cpu3temp"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=SFC0 value=$SFC0"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=SFC1 value=$SFC1"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=SYSTIN value=$SYSTIN"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=CPUTIN value=$CPUTIN"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=AUXTIN0 value=$AUXTIN0"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=AUXTIN2 value=$AUXTIN2"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=AUXTIN3 value=$AUXTIN3"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,sensor=PECI value=$PECI"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,fan=fan,sensor=FANSPEED1 value=$fan1"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,fan=fan,sensor=FANSPEED2 value=$fan2"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,fan=fan,sensor=FANSPEED3 value=$fan3"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,fan=fan,sensor=FANSPEED4 value=$fan4"
+     curl -i -XPOST 'http://192.168.100.9:8086/write?db=temp' --data-binary "health_data,host=$hostip,fan=fan,sensor=FANSPEED5 value=$fan5"
 }   
     
     
